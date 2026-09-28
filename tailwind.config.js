@@ -4,31 +4,23 @@ export default {
   theme: {
     extend: {
       fontFamily: {
-        sans: ["DM Sans", "system-ui", "sans-serif"],
-        display: ["Fraunces", "Georgia", "serif"],
+        sans: ["Inter", "system-ui", "-apple-system", "sans-serif"],
       },
       colors: {
-        lisboa: {
-          night: "#0c0f14",
-          slate: "#151a22",
-          mist: "#8b9aab",
-          tile: "#c45c3e",
-          gold: "#d4a853",
-          river: "#3d6b8a",
+        ink: {
+          DEFAULT: "#111111",
+          soft: "#1a1a1a",
+          mute: "#6b7280",
         },
-      },
-      boxShadow: {
-        glow: "0 0 40px -8px rgba(212, 168, 83, 0.35)",
-        card: "0 8px 32px rgba(0,0,0,0.45)",
-      },
-      animation: {
-        shimmer: "shimmer 4s ease-in-out infinite",
-      },
-      keyframes: {
-        shimmer: {
-          "0%, 100%": { backgroundPosition: "0% 50%" },
-          "50%": { backgroundPosition: "100% 50%" },
+        accent: {
+          DEFAULT: "#ff4d2e",
+          soft: "#ff6b4f",
         },
+        line: "rgba(255,255,255,0.1)",
+      },
+      borderRadius: {
+        xl: "14px",
+        "2xl": "18px",
       },
     },
   },

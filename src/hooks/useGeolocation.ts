@@ -14,7 +14,7 @@ type State = {
   watching: boolean;
 };
 
-export function useGeolocation(enabled: boolean) {
+export function useGeolocation(enabled: boolean, highAccuracy = true) {
   const [state, setState] = useState<State>({
     position: null,
     error: null,
@@ -61,7 +61,7 @@ export function useGeolocation(enabled: boolean) {
           watching: false,
         }));
       },
-      { enableHighAccuracy: true, maximumAge: 2000, timeout: 15000 }
+      { enableHighAccuracy: highAccuracy, maximumAge: 2000, timeout: 15000 }
     );
 
     return () => {
@@ -69,7 +69,7 @@ export function useGeolocation(enabled: boolean) {
         navigator.geolocation.clearWatch(watchId.current);
       }
     };
-  }, [enabled]);
+  }, [enabled, highAccuracy]);
 
   const setSimulated = useCallback((lat: number, lng: number) => {
     setState({

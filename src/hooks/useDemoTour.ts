@@ -42,7 +42,10 @@ export function useDemoTour({
   const runningRef = useRef(false);
 
   useEffect(() => {
-    if (!active || !pois.length) return;
+    if (!active || !pois.length) {
+      runningRef.current = false;
+      return;
+    }
     if (runningRef.current) return;
 
     runningRef.current = true;

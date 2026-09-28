@@ -1,35 +1,29 @@
 import { useEffect, useMemo } from "react";
 import { MapContainer, Polyline, TileLayer, useMap } from "react-leaflet";
-import type { LatLng } from "../lib/routing";
-import type { Poi } from "../data/pois";
 import L from "leaflet";
+import type { Poi } from "../data/pois";
+import type { LatLng } from "../lib/routing";
 
 function FitRoute({ route, pois }: { route: LatLng[]; pois: Poi[] }) {
   const map = useMap();
   useEffect(() => {
-    const points: LatLng[] = [...route];
-    pois.forEach((p) => points.push([p.lat, p.lng]));
-    if (points.length < 2) return;
-    const bounds = L.latLngBounds(points.map(([lat, lng]) => [lat, lng]));
-    map.fitBounds(bounds, { padding: [28, 28], maxZoom: 14, animate: true });
+    const pts: LatLng[] = [...route, ...pois.map((p) => [p.lat, p.lng] as LatLng)];
+    if (pts.length < 2) return;
+    map.fitBounds(L.latLngBounds(pts), { padding: [24, 24], maxZoom: 14 });
   }, [map, route, pois]);
   return null;
 }
 
-type Props = {
-  route: LatLng[];
-  pois: Poi[];
-  loading?: boolean;
-};
+type Props = { route: LatLng[]; pois: Poi[]; loading?: boolean };
 
 export function RoutePreviewMap({ route, pois, loading }: Props) {
   const center = useMemo<LatLng>(() => route[0] ?? [38.6936, -9.2057], [route]);
 
   return (
-    <div className="relative h-52 w-full rounded-2xl overflow-hidden border border-white/10 shadow-card ring-1 ring-white/5">
+    <div className="relative h-48 rounded-2xl overflow-hidden border border-line">
       {loading && (
-        <div className="absolute inset-0 z-10 flex items-center justify-center bg-lisboa-night/60 backdrop-blur-sm">
-          <div className="h-8 w-8 rounded-full border-2 border-lisboa-gold/30 border-t-lisboa-gold animate-spin" />
+        <div className="absolute inset-0 z-10 bg-ink/70 flex items-center justify-center text-sm text-ink-mute">
+          A calcular rota…
         </div>
       )}
       <MapContainer
@@ -45,23 +39,10 @@ export function RoutePreviewMap({ route, pois, loading }: Props) {
       >
         <TileLayer url="https://{s}.basemaps.cartocdn.com/dark_all/{z}/{x}/{y}{r}.png" />
         {route.length > 1 && (
-          <>
-            <Polyline
-              positions={route}
-              pathOptions={{ color: "#d4a853", weight: 10, opacity: 0.15, lineCap: "round" }}
-            />
-            <Polyline
-              positions={route}
-              pathOptions={{ color: "#d4a853", weight: 3, opacity: 0.95, lineCap: "round" }}
-            />
-          </>
+          <Polyline positions={route} pathOptions={{ color: "#ff4d2e", weight: 3, opacity: 0.95 }} />
         )}
         <FitRoute route={route} pois={pois} />
       </MapContainer>
-      <div className="pointer-events-none absolute inset-x-0 bottom-0 h-16 bg-gradient-to-t from-lisboa-night/90 to-transparent" />
-      <p className="pointer-events-none absolute bottom-3 left-3 text-[11px] font-medium text-white/90">
-        Pré-visualização da rota
-      </p>
     </div>
   );
 }

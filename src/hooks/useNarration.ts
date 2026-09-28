@@ -1,17 +1,13 @@
 import { useCallback, useEffect, useRef, useState } from "react";
+import { getEpisode } from "../data/episodes";
 import type { Poi } from "../data/pois";
 import { playPoiAudio } from "../lib/preloadAudio";
-import { getSpeechStatus, speakPortuguese, stopSpeech } from "../lib/speech";
+import { speakPortuguese, stopSpeech } from "../lib/speech";
 
-function narrationText(poi: Poi): string {
-  return `${poi.name}. ${poi.storyTitle}. ${poi.story}`;
-}
-
-export function useNarration() {
+export function useNarration(speechRate = 0.92) {
   const [activePoi, setActivePoi] = useState<Poi | null>(null);
   const [speaking, setSpeaking] = useState(false);
   const [muted, setMuted] = useState(false);
-  const [lastError, setLastError] = useState<string | null>(null);
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const cancelTtsRef = useRef<(() => void) | null>(null);
   const endListeners = useRef<Set<() => void>>(new Set());
@@ -22,17 +18,13 @@ export function useNarration() {
 
   const onNarrationEnd = useCallback((fn: () => void) => {
     endListeners.current.add(fn);
-    return () => {
-      endListeners.current.delete(fn);
-    };
+    return () => endListeners.current.delete(fn);
   }, []);
 
   const stop = useCallback(() => {
     if (audioRef.current) {
       audioRef.current.pause();
       audioRef.current.onended = null;
-      audioRef.current.onplay = null;
-      audioRef.current.onerror = null;
       audioRef.current = null;
     }
     cancelTtsRef.current?.();
@@ -47,37 +39,35 @@ export function useNarration() {
   }, [stop]);
 
   const speakWithTts = useCallback(
-    (poi: Poi) => {
-      cancelTtsRef.current = speakPortuguese(narrationText(poi), {
+    (text: string) => {
+      cancelTtsRef.current = speakPortuguese(text, {
+        rate: speechRate,
         onStart: () => setSpeaking(true),
         onEnd: () => {
           setSpeaking(false);
           notifyEnd();
         },
-        onError: (reason) => {
-          setLastError(reason);
+        onError: () => {
           setSpeaking(false);
           notifyEnd();
         },
       });
     },
-    [notifyEnd]
+    [notifyEnd, speechRate]
   );
 
   const speakPoi = useCallback(
     (poi: Poi) => {
+      const episode = getEpisode(poi);
       setActivePoi(poi);
-      setLastError(null);
       if (muted) {
-        window.setTimeout(() => notifyEnd(), 5500);
+        window.setTimeout(notifyEnd, 4000);
         return;
       }
-
       stop();
 
       const audio = playPoiAudio(poi);
       audioRef.current = audio;
-
       audio.onplay = () => setSpeaking(true);
       audio.onended = () => {
         setSpeaking(false);
@@ -86,12 +76,9 @@ export function useNarration() {
       };
       audio.onerror = () => {
         audioRef.current = null;
-        speakWithTts(poi);
+        speakWithTts(episode.narrationScript);
       };
-
-      void audio.play().catch(() => {
-        speakWithTts(poi);
-      });
+      void audio.play().catch(() => speakWithTts(episode.narrationScript));
     },
     [muted, stop, speakWithTts, notifyEnd]
   );
@@ -99,7 +86,6 @@ export function useNarration() {
   const reset = useCallback(() => {
     stop();
     setActivePoi(null);
-    setLastError(null);
   }, [stop]);
 
   useEffect(() => () => stop(), [stop]);
@@ -109,8 +95,6 @@ export function useNarration() {
     speaking,
     muted,
     setMuted,
-    lastError,
-    speechStatus: getSpeechStatus(),
     speakPoi,
     stop,
     dismiss,

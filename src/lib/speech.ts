@@ -75,6 +75,7 @@ function stopKeepAlive() {
 }
 
 export type SpeakOptions = {
+  rate?: number;
   onStart?: () => void;
   onEnd?: () => void;
   onError?: (reason: string) => void;
@@ -102,7 +103,7 @@ export function speakPortuguese(text: string, options: SpeakOptions = {}): () =>
     const u = new SpeechSynthesisUtterance(text);
     u.lang = portugueseVoice?.lang ?? "pt-PT";
     if (portugueseVoice) u.voice = portugueseVoice;
-    u.rate = 0.92;
+    u.rate = options.rate ?? 0.92;
     u.pitch = 1;
     u.volume = 1;
 

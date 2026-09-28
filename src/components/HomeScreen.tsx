@@ -1,10 +1,6 @@
-import { motion } from "framer-motion";
-import { Headphones, Map, Navigation } from "lucide-react";
 import { DistancePicker } from "./DistancePicker";
-import { PoiCarousel } from "./PoiCarousel";
 import { RoutePreviewMap } from "./RoutePreviewMap";
-import type { RoutePlan } from "../data/pois";
-import type { Poi } from "../data/pois";
+import type { Poi, RoutePlan } from "../data/pois";
 import type { LatLng } from "../lib/routing";
 
 type Props = {
@@ -15,6 +11,7 @@ type Props = {
   route: LatLng[];
   pois: Poi[];
   onStart: () => void;
+  onSimulate: () => void;
   canStart: boolean;
 };
 
@@ -26,35 +23,24 @@ export function HomeScreen({
   route,
   pois,
   onStart,
+  onSimulate,
   canStart,
 }: Props) {
+  const plan = plans.find((p) => p.km === selectedKm);
+
   return (
-    <div className="min-h-full flex flex-col relative pb-28">
-      <header className="px-5 pt-10 pb-2">
-        <div className="flex items-center gap-2 mb-6">
-          <div className="w-10 h-10 rounded-2xl bg-gradient-to-br from-lisboa-tile to-amber-900 flex items-center justify-center shadow-glow border border-white/10">
-            <Map className="w-5 h-5 text-white" strokeWidth={1.75} />
-          </div>
-          <div>
-            <p className="text-[11px] uppercase tracking-[0.2em] text-lisboa-mist">Stride Lisboa</p>
-            <p className="text-sm font-medium text-lisboa-gold">Corrida + audioguia</p>
-          </div>
-        </div>
-        <motion.h1
-          initial={{ opacity: 0, y: 12 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="font-display text-[2.75rem] font-bold leading-[1.02] tracking-tight"
-        >
-          História em
-          <br />
-          <span className="text-lisboa-gold">cada passo.</span>
-        </motion.h1>
-        <p className="text-lisboa-mist mt-3 text-[15px] leading-relaxed max-w-[95%]">
-          Rota de corrida por Belém e Lisboa. Áudio automático quando chegas a cada monumento.
+    <div className="min-h-full flex flex-col max-w-lg mx-auto">
+      <header className="px-5 pt-8 safe-top">
+        <p className="text-xs font-semibold tracking-widest text-accent uppercase">RunApp</p>
+        <h1 className="text-[2rem] font-bold tracking-tight mt-2 leading-tight">
+          Correr em Lisboa com história no ouvido.
+        </h1>
+        <p className="text-ink-mute text-[15px] mt-2 leading-relaxed">
+          Escolhe a distância. A narração começa quando passas por cada monumento.
         </p>
       </header>
 
-      <main className="flex-1 px-5 space-y-5">
+      <main className="flex-1 px-5 mt-6 space-y-5 pb-36">
         <RoutePreviewMap route={route} pois={pois} loading={routeLoading} />
         <DistancePicker
           plans={plans}
@@ -62,31 +48,47 @@ export function HomeScreen({
           onSelect={onSelectKm}
           loading={routeLoading}
         />
-        <PoiCarousel pois={pois} />
-        <div className="flex items-start gap-3 rounded-2xl border border-lisboa-gold/20 bg-lisboa-gold/5 px-4 py-3">
-          <Headphones className="w-5 h-5 text-lisboa-gold shrink-0 mt-0.5" />
-          <p className="text-sm text-white/85 leading-relaxed">
-            Ao começar, as <strong className="text-lisboa-gold font-medium">histórias tocam sozinhas</strong> no
-            computador. No telemóvel, usa o GPS ao correr em Lisboa.
-          </p>
-        </div>
+
+        <section>
+          <h2 className="text-xs font-semibold uppercase tracking-wider text-ink-mute mb-3">
+            Paragens · {plan?.poiIds.length ?? 0}
+          </h2>
+          <ol className="space-y-0 border border-line rounded-2xl overflow-hidden divide-y divide-line">
+            {pois.map((poi, i) => (
+              <li key={poi.id} className="flex gap-3 px-4 py-3 bg-ink-soft/50">
+                <span className="text-xs font-bold text-accent tabular-nums w-5 pt-0.5">
+                  {i + 1}
+                </span>
+                <div className="min-w-0">
+                  <p className="font-medium text-[15px] leading-snug">{poi.name}</p>
+                  <p className="text-xs text-ink-mute mt-0.5 truncate">{poi.storyTitle}</p>
+                </div>
+              </li>
+            ))}
+          </ol>
+        </section>
       </main>
 
-      <div className="fixed bottom-0 left-0 right-0 z-20 pointer-events-none max-w-[430px] mx-auto">
-        <div className="h-20 bg-gradient-to-t from-lisboa-night via-lisboa-night/95 to-transparent" />
-        <div className="pointer-events-auto px-5 pb-6 safe-bottom -mt-14">
-          <motion.button
+      <footer className="fixed bottom-0 inset-x-0 z-10 pointer-events-none">
+        <div className="max-w-lg mx-auto px-5 pb-6 safe-bottom pt-4 bg-gradient-to-t from-ink via-ink to-transparent pointer-events-auto space-y-2">
+          <button
             type="button"
-            whileTap={{ scale: 0.985 }}
             disabled={!canStart}
             onClick={onStart}
-            className="w-full py-4 rounded-2xl font-semibold text-lg bg-gradient-to-r from-lisboa-tile via-amber-600 to-lisboa-tile shadow-glow border border-white/10 disabled:opacity-40 flex items-center justify-center gap-2"
+            className="w-full h-12 rounded-2xl bg-white text-ink font-semibold text-[15px] disabled:opacity-40"
           >
-            <Navigation className="w-5 h-5" />
-            Começar corrida
-          </motion.button>
+            Iniciar corrida (GPS)
+          </button>
+          <button
+            type="button"
+            disabled={!canStart}
+            onClick={onSimulate}
+            className="w-full h-11 rounded-2xl border border-line text-[14px] font-medium text-white/90 disabled:opacity-40"
+          >
+            Simular percurso e ouvir histórias
+          </button>
         </div>
-      </div>
+      </footer>
     </div>
   );
 }

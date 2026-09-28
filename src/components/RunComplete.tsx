@@ -1,6 +1,3 @@
-import { motion } from "framer-motion";
-import { PartyPopper, RotateCcw } from "lucide-react";
-
 type Props = {
   distanceKm: number;
   elapsedSec: number;
@@ -8,57 +5,40 @@ type Props = {
   onHome: () => void;
 };
 
-function formatTime(totalSec: number): string {
-  const m = Math.floor(totalSec / 60);
-  const s = Math.floor(totalSec % 60);
+function formatTime(sec: number): string {
+  const m = Math.floor(sec / 60);
+  const s = Math.floor(sec % 60);
   return `${m}:${s.toString().padStart(2, "0")}`;
 }
 
 export function RunComplete({ distanceKm, elapsedSec, stories, onHome }: Props) {
   return (
-    <motion.div
-      initial={{ opacity: 0 }}
-      animate={{ opacity: 1 }}
-      className="fixed inset-0 z-[950] flex items-end sm:items-center justify-center bg-black/80 backdrop-blur-lg p-4"
-    >
-      <motion.div
-        initial={{ y: 80, scale: 0.95 }}
-        animate={{ y: 0, scale: 1 }}
-        transition={{ type: "spring", damping: 22 }}
-        className="w-full max-w-md rounded-3xl border border-lisboa-gold/25 bg-gradient-to-b from-lisboa-slate to-lisboa-night p-6 shadow-glow"
-      >
-        <div className="flex items-center gap-3">
-          <div className="p-3 rounded-2xl bg-lisboa-gold/15 border border-lisboa-gold/30">
-            <PartyPopper className="w-6 h-6 text-lisboa-gold" />
-          </div>
-          <div>
-            <h2 className="font-display text-2xl font-bold">Corrida épica</h2>
-            <p className="text-sm text-lisboa-mist">Lisboa ficou mais tua hoje.</p>
-          </div>
-        </div>
-        <div className="grid grid-cols-3 gap-3 mt-6">
-          <div className="rounded-2xl bg-black/30 border border-white/5 p-3 text-center">
-            <p className="text-xl font-bold tabular-nums">{distanceKm.toFixed(1)}</p>
-            <p className="text-[10px] uppercase text-lisboa-mist mt-1">km</p>
-          </div>
-          <div className="rounded-2xl bg-black/30 border border-white/5 p-3 text-center">
-            <p className="text-xl font-bold tabular-nums">{formatTime(elapsedSec)}</p>
-            <p className="text-[10px] uppercase text-lisboa-mist mt-1">tempo</p>
-          </div>
-          <div className="rounded-2xl bg-black/30 border border-white/5 p-3 text-center">
-            <p className="text-xl font-bold tabular-nums">{stories}</p>
-            <p className="text-[10px] uppercase text-lisboa-mist mt-1">histórias</p>
-          </div>
+    <div className="fixed inset-0 z-[600] bg-black/70 flex items-end sm:items-center justify-center p-4">
+      <div className="w-full max-w-md rounded-2xl border border-line bg-ink-soft p-6">
+        <h2 className="text-xl font-bold">Corrida terminada</h2>
+        <p className="text-ink-mute text-sm mt-1">Bom trabalho em Lisboa.</p>
+        <div className="grid grid-cols-3 gap-2 mt-5">
+          <Stat v={distanceKm.toFixed(1)} l="km" />
+          <Stat v={formatTime(elapsedSec)} l="tempo" />
+          <Stat v={String(stories)} l="histórias" />
         </div>
         <button
           type="button"
           onClick={onHome}
-          className="mt-6 w-full py-3.5 rounded-2xl bg-lisboa-tile font-semibold flex items-center justify-center gap-2 hover:bg-lisboa-tile/90 transition-colors"
+          className="mt-6 w-full h-11 rounded-xl bg-white text-ink font-semibold text-sm"
         >
-          <RotateCcw className="w-4 h-4" />
-          Nova rota
+          Voltar ao início
         </button>
-      </motion.div>
-    </motion.div>
+      </div>
+    </div>
+  );
+}
+
+function Stat({ v, l }: { v: string; l: string }) {
+  return (
+    <div className="rounded-xl border border-line bg-ink py-3 text-center">
+      <p className="text-lg font-bold tabular-nums">{v}</p>
+      <p className="text-[10px] uppercase text-ink-mute mt-1">{l}</p>
+    </div>
   );
 }
