@@ -2,7 +2,10 @@ import { defineConfig } from "vite";
 import react from "@vitejs/plugin-react";
 import { VitePWA } from "vite-plugin-pwa";
 
+const base = process.env.GITHUB_ACTIONS ? "/RunApp/" : "/";
+
 export default defineConfig({
+  base,
   plugins: [
     react(),
     VitePWA({
@@ -11,11 +14,11 @@ export default defineConfig({
         globPatterns: ["**/*.{js,css,html,ico,svg,wav,webmanifest}"],
       },
       manifest: {
-        name: "Stride Lisboa",
-        short_name: "Stride",
-        description: "Rotas de corrida com história por GPS em Lisboa",
-        theme_color: "#0c0f14",
-        background_color: "#0c0f14",
+        name: "RunApp Lisboa",
+        short_name: "RunApp",
+        description: "Correr em Lisboa com episódios por GPS",
+        theme_color: "#111111",
+        background_color: "#111111",
         display: "standalone",
         orientation: "portrait",
       },
